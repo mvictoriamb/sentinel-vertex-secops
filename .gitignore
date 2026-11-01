@@ -1,10 +1,13 @@
 .venv/
+.venv-old/
 venv/
 ENV/
 
 __pycache__/
+.pytest_cache/
 *.py[cod]
 *$py.class
+.pytest_cache/
 .pytest_cache/
 
 data/raw/
