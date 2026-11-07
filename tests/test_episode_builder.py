@@ -120,3 +120,27 @@ def test_rejects_naive_decision_timestamp(builder, root):
             connections=[],
             decision_time=datetime(2026, 1, 1, 10, 3),
         )
+
+def test_excludes_child_created_before_parent(builder, root):
+    child = make_process(
+        "child-guid", "root-guid", minute=2
+    )
+
+    grandchild = make_process(
+        "grandchild-guid", "child-guid", minute=1
+    )
+
+    episode = builder.build(
+        target=root,
+        processes=[root, child, grandchild],
+        connections=[],
+        decision_time=BASE + timedelta(minutes=3),
+    )
+
+    guids = {
+        process.process_guid
+        for process in episode.related_processes
+    }
+
+    assert "child-guid" in guids
+    assert "grandchild-guid" not in guids
