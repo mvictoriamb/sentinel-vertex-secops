@@ -69,6 +69,9 @@ class EpisodeBuilder:
 
         # Build a process tree based on parent GUID relationships.
         known_guids = {target.process_guid}
+        known_creation_times = {
+            target.process_guid: target.timestamp
+        }
         related = []
         remaining = [
             process for process in eligible_processes
@@ -76,9 +79,15 @@ class EpisodeBuilder:
         ]
 
         while True:
+            
             newly_found = [
                 process for process in remaining
-                if process.parent_process_guid in known_guids
+                if (
+                    process.parent_process_guid in known_creation_times
+                    and process.timestamp >= known_creation_times[
+                        process.parent_process_guid
+                    ]
+                )
             ]
 
             if not newly_found:
@@ -86,6 +95,7 @@ class EpisodeBuilder:
 
             for process in newly_found:
                 known_guids.add(process.process_guid)
+                known_creation_times[process.process_guid] = process.timestamp
                 related.append(process)
 
             found_ids = {id(process) for process in newly_found}
